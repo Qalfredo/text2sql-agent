@@ -6,7 +6,7 @@ Reusable Chainlit + Smolagents starter for natural-language-to-SQL workflows. Th
 - Chainlit chat interface in [app.py](/Users/alfredo/text2sql_agent/text2sql-agent/app.py)
 - Runtime and prompt assembly in [sql_agent/agent.py](/Users/alfredo/text2sql_agent/text2sql-agent/sql_agent/agent.py)
 - Database access and SQL policy enforcement in [sql_agent/database.py](/Users/alfredo/text2sql_agent/text2sql-agent/sql_agent/database.py)
-- Documentation ingestion from cached JSON, PDF files, Coda, and Markdown files in [sql_agent/docs_loader.py](/Users/alfredo/text2sql_agent/text2sql-agent/sql_agent/docs_loader.py)
+- Documentation ingestion from Coda and Markdown files in [sql_agent/docs_loader.py](/Users/alfredo/text2sql_agent/text2sql-agent/sql_agent/docs_loader.py)
 - Reusable schema-to-Markdown export pipeline in [sql_agent/schema_markdown.py](/Users/alfredo/text2sql_agent/text2sql-agent/sql_agent/schema_markdown.py)
 
 ## Install
@@ -36,14 +36,11 @@ Optional database settings:
 - Legacy `REDSHIFT_*` variables are still accepted for backward compatibility
 
 Optional documentation settings:
-- `PDF_DOC_PATHS` for one or more schema PDFs
-- `PDF_DOCS_DIR` to auto-discover PDFs under a directory
 - `MARKDOWN_DOCS_DIR` for one or more `.md` files that should be injected into the agent context
-- `SCHEMA_DOCS_JSON_PATH` for cached extracted schema docs
 - `CODA_API_TOKEN`, `CODA_DOC_ID`, `CODA_TABLE_ID_OR_NAME`, and the column mapping variables if you want to load structured docs from Coda
 
 ## Markdown docs
-Place reusable database notes in [docs/markdown](/Users/alfredo/text2sql_agent/text2sql-agent/docs/markdown). Every `.md` file in that directory tree is loaded and appended to the agent context as additional documentation. This is additive, so Markdown works alongside cached JSON, PDF parsing, and Coda-based structured docs.
+Place reusable database notes in [docs/markdown](/Users/alfredo/text2sql_agent/text2sql-agent/docs/markdown). Every `.md` file in that directory tree is loaded and appended to the agent context as additional documentation. This is additive, so Markdown works alongside Coda-based structured docs.
 
 Recommended content for Markdown files:
 - business metric definitions
@@ -77,12 +74,6 @@ Outputs:
 Useful option for a quick smoke test:
 ```bash
 python scripts/evaluate_agent.py --max-items 3
-```
-
-## Refresh cached PDF docs
-```bash
-source .venv/bin/activate
-python scripts/extract_pdf_docs.py
 ```
 
 ## Export schema docs from any database

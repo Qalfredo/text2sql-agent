@@ -51,9 +51,7 @@ class Settings:
     database_url: str
     allowed_tables: list[str]
     max_rows: int
-    pdf_doc_paths: list[str]
     markdown_docs_dir: str | None
-    schema_docs_json_path: str
     sql_dialect: str
     database_label: str
     model_provider: str
@@ -89,9 +87,7 @@ def load_settings() -> Settings:
         database_url=database_url,
         allowed_tables=allowed_tables,
         max_rows=int(os.getenv("MAX_RESULT_ROWS", "200")),
-        pdf_doc_paths=_split_csv(os.getenv("PDF_DOC_PATHS", "")),
         markdown_docs_dir=os.getenv("MARKDOWN_DOCS_DIR", "docs/markdown").strip() or None,
-        schema_docs_json_path=os.getenv("SCHEMA_DOCS_JSON_PATH", "docs/processed/schema_docs.json").strip(),
         sql_dialect=os.getenv("SQL_DIALECT", "postgres").strip(),
         database_label=os.getenv("DATABASE_LABEL", "SQL database").strip(),
         model_provider=os.getenv("MODEL_PROVIDER", "openai").strip().lower(),
