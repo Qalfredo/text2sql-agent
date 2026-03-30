@@ -1,4 +1,5 @@
 import asyncio
+import os
 
 import chainlit as cl
 from dotenv import load_dotenv
@@ -7,6 +8,12 @@ from sql_agent.agent import build_agent_runtime
 from sql_agent.config import load_settings
 
 load_dotenv(override=True)
+
+# Chainlit reserves DATABASE_URL for its own Postgres data layer. We use
+# APP_DATABASE_URL for the SQL agent runtime to avoid DSN collisions.
+if os.getenv("DATABASE_URL") and not os.getenv("APP_DATABASE_URL"):
+    os.environ["APP_DATABASE_URL"] = os.getenv("DATABASE_URL", "")
+os.environ.pop("DATABASE_URL", None)
 
 
 @cl.on_chat_start

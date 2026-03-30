@@ -1,0 +1,223 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2868
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 [\
+  \{\
+    "id": "q001",\
+    "question": "How many customers are there?",\
+    "gold_sql": "SELECT COUNT(*) FROM Customer;",\
+    "category": "count",\
+    "difficulty": "easy"\
+  \},\
+  \{\
+    "id": "q002",\
+    "question": "List all customer first and last names.",\
+    "gold_sql": "SELECT FirstName, LastName FROM Customer;",\
+    "category": "select",\
+    "difficulty": "easy"\
+  \},\
+  \{\
+    "id": "q003",\
+    "question": "How many tracks are in the database?",\
+    "gold_sql": "SELECT COUNT(*) FROM Track;",\
+    "category": "count",\
+    "difficulty": "easy"\
+  \},\
+  \{\
+    "id": "q004",\
+    "question": "List all album titles.",\
+    "gold_sql": "SELECT Title FROM Album;",\
+    "category": "select",\
+    "difficulty": "easy"\
+  \},\
+  \{\
+    "id": "q005",\
+    "question": "How many employees are there?",\
+    "gold_sql": "SELECT COUNT(*) FROM Employee;",\
+    "category": "count",\
+    "difficulty": "easy"\
+  \},\
+  \{\
+    "id": "q006",\
+    "question": "List all genres.",\
+    "gold_sql": "SELECT Name FROM Genre;",\
+    "category": "select",\
+    "difficulty": "easy"\
+  \},\
+  \{\
+    "id": "q007",\
+    "question": "How many playlists exist?",\
+    "gold_sql": "SELECT COUNT(*) FROM Playlist;",\
+    "category": "count",\
+    "difficulty": "easy"\
+  \},\
+  \{\
+    "id": "q008",\
+    "question": "List all media types.",\
+    "gold_sql": "SELECT Name FROM MediaType;",\
+    "category": "select",\
+    "difficulty": "easy"\
+  \},\
+  \{\
+    "id": "q009",\
+    "question": "How many invoices are there?",\
+    "gold_sql": "SELECT COUNT(*) FROM Invoice;",\
+    "category": "count",\
+    "difficulty": "easy"\
+  \},\
+  \{\
+    "id": "q010",\
+    "question": "List all artists.",\
+    "gold_sql": "SELECT Name FROM Artist;",\
+    "category": "select",\
+    "difficulty": "easy"\
+  \}\
+]\
+[\
+  \{\
+    "id": "q011",\
+    "question": "List all customers and their invoice totals.",\
+    "gold_sql": "SELECT c.CustomerId, SUM(i.Total) FROM Customer c JOIN Invoice i ON c.CustomerId = i.CustomerId GROUP BY c.CustomerId;",\
+    "category": "aggregation_join",\
+    "difficulty": "medium"\
+  \},\
+  \{\
+    "id": "q012",\
+    "question": "Which customers have spent the most money?",\
+    "gold_sql": "SELECT c.CustomerId, SUM(i.Total) AS total_spent FROM Customer c JOIN Invoice i ON c.CustomerId = i.CustomerId GROUP BY c.CustomerId ORDER BY total_spent DESC;",\
+    "category": "aggregation_order",\
+    "difficulty": "medium"\
+  \},\
+  \{\
+    "id": "q013",\
+    "question": "List all tracks with their album titles.",\
+    "gold_sql": "SELECT t.Name, a.Title FROM Track t JOIN Album a ON t.AlbumId = a.AlbumId;",\
+    "category": "join",\
+    "difficulty": "medium"\
+  \},\
+  \{\
+    "id": "q014",\
+    "question": "List all tracks with their genre names.",\
+    "gold_sql": "SELECT t.Name, g.Name FROM Track t JOIN Genre g ON t.GenreId = g.GenreId;",\
+    "category": "join",\
+    "difficulty": "medium"\
+  \},\
+  \{\
+    "id": "q015",\
+    "question": "How many tracks are there per genre?",\
+    "gold_sql": "SELECT g.Name, COUNT(*) FROM Track t JOIN Genre g ON t.GenreId = g.GenreId GROUP BY g.Name;",\
+    "category": "group_by",\
+    "difficulty": "medium"\
+  \},\
+  \{\
+    "id": "q016",\
+    "question": "What is the total revenue per country?",\
+    "gold_sql": "SELECT BillingCountry, SUM(Total) FROM Invoice GROUP BY BillingCountry;",\
+    "category": "aggregation",\
+    "difficulty": "medium"\
+  \},\
+  \{\
+    "id": "q017",\
+    "question": "List all invoices with customer names.",\
+    "gold_sql": "SELECT i.InvoiceId, c.FirstName, c.LastName FROM Invoice i JOIN Customer c ON i.CustomerId = c.CustomerId;",\
+    "category": "join",\
+    "difficulty": "medium"\
+  \},\
+  \{\
+    "id": "q018",\
+    "question": "What are the top 5 most expensive tracks?",\
+    "gold_sql": "SELECT Name, UnitPrice FROM Track ORDER BY UnitPrice DESC LIMIT 5;",\
+    "category": "top_k",\
+    "difficulty": "medium"\
+  \},\
+  \{\
+    "id": "q019",\
+    "question": "List all employees and their managers.",\
+    "gold_sql": "SELECT e.FirstName, m.FirstName FROM Employee e LEFT JOIN Employee m ON e.ReportsTo = m.EmployeeId;",\
+    "category": "self_join",\
+    "difficulty": "medium"\
+  \},\
+  \{\
+    "id": "q020",\
+    "question": "How many invoices does each customer have?",\
+    "gold_sql": "SELECT CustomerId, COUNT(*) FROM Invoice GROUP BY CustomerId;",\
+    "category": "group_by",\
+    "difficulty": "medium"\
+  \}\
+]\
+[\
+  \{\
+    "id": "q021",\
+    "question": "Which artist has generated the most revenue?",\
+    "gold_sql": "SELECT ar.Name, SUM(il.UnitPrice * il.Quantity) AS revenue FROM InvoiceLine il JOIN Track t ON il.TrackId = t.TrackId JOIN Album al ON t.AlbumId = al.AlbumId JOIN Artist ar ON al.ArtistId = ar.ArtistId GROUP BY ar.Name ORDER BY revenue DESC LIMIT 1;",\
+    "category": "multi_join",\
+    "difficulty": "hard"\
+  \},\
+  \{\
+    "id": "q022",\
+    "question": "Which genre has the highest number of tracks sold?",\
+    "gold_sql": "SELECT g.Name, SUM(il.Quantity) AS total_sold FROM InvoiceLine il JOIN Track t ON il.TrackId = t.TrackId JOIN Genre g ON t.GenreId = g.GenreId GROUP BY g.Name ORDER BY total_sold DESC LIMIT 1;",\
+    "category": "multi_join",\
+    "difficulty": "hard"\
+  \},\
+  \{\
+    "id": "q023",\
+    "question": "Which customer has purchased the most tracks?",\
+    "gold_sql": "SELECT c.CustomerId, SUM(il.Quantity) AS total_tracks FROM Customer c JOIN Invoice i ON c.CustomerId = i.CustomerId JOIN InvoiceLine il ON i.InvoiceId = il.InvoiceId GROUP BY c.CustomerId ORDER BY total_tracks DESC LIMIT 1;",\
+    "category": "multi_join",\
+    "difficulty": "hard"\
+  \},\
+  \{\
+    "id": "q024",\
+    "question": "What is the average invoice total?",\
+    "gold_sql": "SELECT AVG(Total) FROM Invoice;",\
+    "category": "aggregation",\
+    "difficulty": "hard"\
+  \},\
+  \{\
+    "id": "q025",\
+    "question": "List customers who have never made a purchase.",\
+    "gold_sql": "SELECT c.CustomerId FROM Customer c LEFT JOIN Invoice i ON c.CustomerId = i.CustomerId WHERE i.InvoiceId IS NULL;",\
+    "category": "anti_join",\
+    "difficulty": "hard"\
+  \},\
+  \{\
+    "id": "q026",\
+    "question": "Which employee supports the most customers?",\
+    "gold_sql": "SELECT e.EmployeeId, COUNT(c.CustomerId) FROM Employee e JOIN Customer c ON e.EmployeeId = c.SupportRepId GROUP BY e.EmployeeId ORDER BY COUNT(c.CustomerId) DESC LIMIT 1;",\
+    "category": "aggregation_join",\
+    "difficulty": "hard"\
+  \},\
+  \{\
+    "id": "q027",\
+    "question": "What is the total revenue generated per artist?",\
+    "gold_sql": "SELECT ar.Name, SUM(il.UnitPrice * il.Quantity) FROM InvoiceLine il JOIN Track t ON il.TrackId = t.TrackId JOIN Album al ON t.AlbumId = al.AlbumId JOIN Artist ar ON al.ArtistId = ar.ArtistId GROUP BY ar.Name;",\
+    "category": "multi_join",\
+    "difficulty": "hard"\
+  \},\
+  \{\
+    "id": "q028",\
+    "question": "Which country has the highest average invoice value?",\
+    "gold_sql": "SELECT BillingCountry, AVG(Total) AS avg_total FROM Invoice GROUP BY BillingCountry ORDER BY avg_total DESC LIMIT 1;",\
+    "category": "aggregation",\
+    "difficulty": "hard"\
+  \},\
+  \{\
+    "id": "q029",\
+    "question": "Find the most popular genre in terms of number of tracks.",\
+    "gold_sql": "SELECT g.Name, COUNT(*) FROM Track t JOIN Genre g ON t.GenreId = g.GenreId GROUP BY g.Name ORDER BY COUNT(*) DESC LIMIT 1;",\
+    "category": "group_by",\
+    "difficulty": "hard"\
+  \},\
+  \{\
+    "id": "q030",\
+    "question": "Which artist has the most albums?",\
+    "gold_sql": "SELECT ar.Name, COUNT(al.AlbumId) FROM Artist ar JOIN Album al ON ar.ArtistId = al.ArtistId GROUP BY ar.Name ORDER BY COUNT(al.AlbumId) DESC LIMIT 1;",\
+    "category": "aggregation_join",\
+    "difficulty": "hard"\
+  \}\
+]}

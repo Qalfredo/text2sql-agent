@@ -72,18 +72,18 @@ class Settings:
 
 
 def load_settings() -> Settings:
-    database_url = os.getenv("DATABASE_URL", os.getenv("REDSHIFT_URL", "")).strip()
+    database_url = os.getenv("APP_DATABASE_URL", os.getenv("DATABASE_URL", os.getenv("REDSHIFT_URL", ""))).strip()
     if not database_url:
         database_url = _build_database_url_from_env()
     allowed_tables = _split_csv(os.getenv("ALLOWED_TABLES", ""))
 
     if not database_url:
         raise ValueError(
-            "Set DATABASE_URL or provide DATABASE_HOST, DATABASE_USER, "
+            "Set APP_DATABASE_URL (or legacy DATABASE_URL) or provide DATABASE_HOST, DATABASE_USER, "
             "DATABASE_PASSWORD, and DATABASE_NAME (legacy REDSHIFT_* variables are still supported)."
         )
     if not allowed_tables:
-        raise ValueError("ALLOWED_TABLES is required (comma-separated schema.table names).")
+        raise ValueError("ALLOWED_TABLES is required (comma-separated table names or schema.table names).")
 
     return Settings(
         database_url=database_url,

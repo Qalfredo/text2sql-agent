@@ -18,7 +18,7 @@ FORBIDDEN_SQL_RE = re.compile(
 
 @dataclass
 class TableColumn:
-    schema_name: str
+    schema_name: str | None
     table_name: str
     column_name: str
     data_type: str
@@ -31,27 +31,43 @@ class SQLGuardError(ValueError):
 class SQLDatabaseClient:
     def __init__(self, url: str, allowed_tables: list[str], sql_dialect: str, max_rows: int = 200):
         self.engine: Engine = create_engine(url)
-        self.allowed_tables = self._normalize_allowed(allowed_tables)
         self.sql_dialect = sql_dialect
         self.max_rows = max_rows
+        self.allowed_tables = self._normalize_allowed(allowed_tables)
+
+    def _normalize_allowed(self, allowed_tables: list[str]) -> set[str]:
+        normalized: set[str] = set()
+        is_sqlite = self.sql_dialect.strip().lower() == "sqlite"
+        for table in allowed_tables:
+            cleaned = table.strip().lower()
+            if not cleaned:
+                continue
+            # SQLite does not use Postgres-like schemas; tolerate schema-qualified
+            # allowlists (e.g., public.customers) by collapsing to table name.
+            if is_sqlite and "." in cleaned:
+                cleaned = cleaned.split(".", 1)[1]
+            normalized.add(cleaned)
+        return normalized
 
     @staticmethod
-    def _normalize_allowed(allowed_tables: list[str]) -> set[str]:
-        normalized: set[str] = set()
-        for table in allowed_tables:
-            normalized.add(table.strip().lower())
-        return normalized
+    def _split_table_ref(table_ref: str) -> tuple[str | None, str]:
+        if "." not in table_ref:
+            return None, table_ref
+        schema_name, table_name = table_ref.split(".", 1)
+        return schema_name, table_name
+
+    @staticmethod
+    def _join_table_ref(schema_name: str | None, table_name: str) -> str:
+        return f"{schema_name}.{table_name}" if schema_name else table_name
 
     def fetch_schema(self) -> dict[str, list[TableColumn]]:
         schema_map: dict[str, list[TableColumn]] = {}
         inspector = inspect(self.engine)
 
         for fqtn in sorted(self.allowed_tables):
-            if "." not in fqtn:
-                raise ValueError(f"Allowed table must be schema-qualified: {fqtn}")
-            schema_name, table_name = fqtn.split(".", 1)
+            schema_name, table_name = self._split_table_ref(fqtn)
             raw_columns = inspector.get_columns(table_name, schema=schema_name)
-            schema_map[f"{schema_name}.{table_name}"] = [
+            schema_map[self._join_table_ref(schema_name, table_name)] = [
                 TableColumn(
                     schema_name=schema_name,
                     table_name=table_name,
@@ -97,16 +113,24 @@ class SQLDatabaseClient:
     def _extract_tables(self, sql: str) -> set[str]:
         parsed = parse_one(sql, read=self.sql_dialect)
         found: set[str] = set()
+        is_sqlite = self.sql_dialect.strip().lower() == "sqlite"
 
         for node in parsed.find_all(exp.Table):
             table_name = (node.name or "").strip().lower()
             schema_name = (node.db or "").strip().lower()
             if not table_name:
                 continue
+            if is_sqlite:
+                found.add(table_name)
+                continue
             if schema_name:
-                found.add(f"{schema_name}.{table_name}")
+                found.add(self._join_table_ref(schema_name, table_name))
             else:
-                matches = [table for table in self.allowed_tables if table.endswith(f".{table_name}")]
+                matches = [
+                    table
+                    for table in self.allowed_tables
+                    if table == table_name or table.endswith(f".{table_name}")
+                ]
                 if len(matches) == 1:
                     found.add(matches[0])
                 else:
@@ -132,11 +156,14 @@ def build_schema_context(
 
     lines: list[str] = [
         f"You can query only the following {database_label} tables.",
-        "Use exact column names and prefer explicit schema-qualified table names.",
+        "Use exact column names and prefer explicit schema-qualified table names when the database uses schemas.",
     ]
 
     for fqtn, columns in sorted(schema_map.items()):
-        schema_name, table_name = fqtn.split(".", 1)
+        if "." in fqtn:
+            schema_name, table_name = fqtn.split(".", 1)
+        else:
+            schema_name, table_name = "", fqtn
         table_desc = doc_lookup.get((schema_name, table_name, None)) or doc_lookup.get(("", table_name, None))
 
         lines.append(f"\nTable: {fqtn}")
