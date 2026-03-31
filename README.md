@@ -1,64 +1,83 @@
-# SQL Agent Template
+# Text-to-SQL Agent
 
-Reusable Chainlit + Smolagents starter for natural-language-to-SQL workflows. The app keeps a guarded read-only SQL tool, limits access to an explicit table allowlist, and enriches schema context with structured docs plus optional Markdown reference files.
+A reusable Chainlit + Smolagents starter for natural-language SQL workflows.
 
-## What it includes
-- Chainlit chat interface in [app.py](/Users/alfredo/text2sql_agent/text2sql-agent/app.py)
-- Runtime and prompt assembly in [sql_agent/agent.py](/Users/alfredo/text2sql_agent/text2sql-agent/sql_agent/agent.py)
-- Database access and SQL policy enforcement in [sql_agent/database.py](/Users/alfredo/text2sql_agent/text2sql-agent/sql_agent/database.py)
-- Documentation ingestion from Coda and Markdown files in [sql_agent/docs_loader.py](/Users/alfredo/text2sql_agent/text2sql-agent/sql_agent/docs_loader.py)
-- Reusable schema-to-Markdown export pipeline in [sql_agent/schema_markdown.py](/Users/alfredo/text2sql_agent/text2sql-agent/sql_agent/schema_markdown.py)
+It ships with:
+- a guarded read-only SQL execution tool,
+- explicit table allowlisting,
+- optional schema/context enrichment from Markdown,
+- helper scripts for Chinook demo setup and benchmark evaluation.
 
-## Install
-Use Python 3.11 or 3.12.
+## Quickstart (Chinook SQLite)
+If you want the fastest path to a running demo, use the included Chinook setup.
 
+1. Create and activate a virtual environment:
 ```bash
 python3.12 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## Configure
-Copy the example environment file and fill in your values:
-
+2. Clone Chinook and generate local assets:
 ```bash
-cp .env.example .env
+git clone https://github.com/lerocha/chinook-database.git
+python scripts/setup_chinook_sqlite.py --chinook-repo-dir /absolute/path/to/chinook-database
 ```
 
-Required variables:
-- `APP_DATABASE_URL` (preferred) or legacy `DATABASE_URL`, or the component variables `DATABASE_HOST`, `DATABASE_PORT`, `DATABASE_USER`, `DATABASE_PASSWORD`, `DATABASE_NAME`
-- `ALLOWED_TABLES` as comma-separated table names or `schema.table` values
-- `MODEL_PROVIDER` and the matching credentials such as `OPENAI_API_KEY` or `HF_TOKEN`
+3. Copy settings from `examples/chinook/.env.generated` into your root `.env`.
 
-Optional database settings:
-- `SQL_DIALECT` for SQLGlot parsing, for example `postgres`, `mysql`, `snowflake`, or `redshift`
-- `DATABASE_LABEL` for UI and prompt wording
-- Legacy `REDSHIFT_*` variables are still accepted for backward compatibility
-
-Optional documentation settings:
-- `MARKDOWN_DOCS_DIR` for one or more `.md` files that should be injected into the agent context
-- `CODA_API_TOKEN`, `CODA_DOC_ID`, `CODA_TABLE_ID_OR_NAME`, and the column mapping variables if you want to load structured docs from Coda
-
-## Markdown docs
-Place reusable database notes in [docs/markdown](/Users/alfredo/text2sql_agent/text2sql-agent/docs/markdown). Every `.md` file in that directory tree is loaded and appended to the agent context as additional documentation. This is additive, so Markdown works alongside Coda-based structured docs.
-
-Recommended content for Markdown files:
-- business metric definitions
-- join caveats
-- table ownership notes
-- known filters or data quality warnings
-- example query patterns
-
-## Run the app
+4. Start the app:
 ```bash
 ./scripts/run_chainlit.sh
 ```
 
-Then open `http://localhost:8001` (or the local Chainlit URL shown in the terminal).
+Open `http://localhost:8001`.
 
+## Configuration
+Create your environment file:
+```bash
+cp .env.example .env
+```
 
-## Evaluate against a benchmark
-Use the evaluator to run the implemented agent on a benchmark dataset and save machine-readable reports.
+Minimum required settings:
+- `APP_DATABASE_URL` (preferred) or `DATABASE_URL` (legacy fallback)
+- `ALLOWED_TABLES` (comma-separated table names or `schema.table`)
+- `MODEL_PROVIDER` and provider credentials (`OPENAI_API_KEY` or `HF_TOKEN`)
+
+Optional database settings:
+- `SQL_DIALECT` (for SQLGlot parsing, e.g. `postgres`, `mysql`, `sqlite`)
+- `DATABASE_LABEL`
+- legacy `REDSHIFT_*` variables are still supported
+
+Optional documentation settings:
+- `MARKDOWN_DOCS_DIR`
+
+## Repository layout
+Core runtime:
+- `app.py`: Chainlit entrypoint
+- `sql_agent/agent.py`: model + tool wiring
+- `sql_agent/database.py`: SQL guard and DB execution
+- `sql_agent/docs_loader.py`: Markdown docs ingestion
+- `sql_agent/schema_markdown.py`: schema introspection and Markdown export
+
+Scripts:
+- `scripts/run_chainlit.sh`: local launcher
+- `scripts/setup_chinook_sqlite.py`: Chinook SQLite bootstrap
+- `scripts/export_database_docs.py`: generic DB-to-Markdown exporter
+- `scripts/evaluate_agent.py`: benchmark evaluator
+
+## Markdown documentation workflow
+Markdown files under `docs/markdown` (or your configured `MARKDOWN_DOCS_DIR`) are injected into agent context.
+
+Good candidates for Markdown docs:
+- business definitions
+- join caveats
+- data quality notes
+- filter caveats
+- sample query guidance
+
+## Benchmark evaluation
+Run the evaluator against the included benchmark dataset:
 
 ```bash
 source .venv/bin/activate
@@ -68,16 +87,16 @@ python scripts/evaluate_agent.py \
 ```
 
 Outputs:
-- JSON report with per-question details plus summary metrics
+- JSON report with summary + per-question details
 - CSV report for spreadsheet analysis
 
-Useful option for a quick smoke test:
+Quick smoke test:
 ```bash
 python scripts/evaluate_agent.py --max-items 3
 ```
 
 ## Export schema docs from any database
-The project now includes a generic Markdown exporter that can introspect a live database and emit `.md` files that the agent can load directly.
+Use the schema exporter to generate Markdown context from your own database:
 
 ```bash
 source .venv/bin/activate
@@ -88,49 +107,21 @@ python scripts/export_database_docs.py \
   --allowed-tables "$ALLOWED_TABLES"
 ```
 
-What this writes:
+Generated files:
 - `schema_overview.md`
-- one Markdown file per table under `tables/`
-- `allowed_tables.txt` with the discovered allowlist
+- `tables/*.md` (one file per table)
+- `allowed_tables.txt`
 
-For SQLite, the exporter works with Python's built-in `sqlite3`. For other databases, install the correct SQLAlchemy driver for your target system.
+## Chinook notes
+The Chinook helper script writes:
+- `examples/chinook/data/chinook.sqlite`
+- `examples/chinook/docs/markdown/*`
+- `examples/chinook/.env.generated`
 
-## Chinook example setup
-Chinook is included as a documented example so you can stand the app up quickly against a known sample database while keeping the codebase generic.
+If you prefer another engine (PostgreSQL/MySQL/SQL Server/etc.), create the DB from the official Chinook SQL scripts and run `scripts/export_database_docs.py` against it.
 
-Official source: [lerocha/chinook-database](https://github.com/lerocha/chinook-database)
-
-### Option A: quickest path with the bundled SQLite asset
-1. Clone the Chinook repository:
-   ```bash
-   git clone https://github.com/lerocha/chinook-database.git
-   ```
-2. From this project root, create the local example database and Markdown docs:
-   ```bash
-   python scripts/setup_chinook_sqlite.py --chinook-repo-dir /absolute/path/to/chinook-database
-   ```
-3. Open the generated file [examples/chinook/.env.generated](/Users/alfredo/text2sql_agent/text2sql-agent/examples/chinook/.env.generated) after the script runs.
-4. Copy those values into your root `.env`.
-5. Start the app:
-   ```bash
-   ./scripts/run_chainlit.sh
-   ```
-
-The setup script:
-- copies `Chinook_Sqlite.sqlite` into `examples/chinook/data/chinook.sqlite`
-- exports agent-ready Markdown docs into `examples/chinook/docs/markdown`
-- generates an environment snippet with `APP_DATABASE_URL`, `SQL_DIALECT=sqlite`, `MARKDOWN_DOCS_DIR`, and `ALLOWED_TABLES`
-
-### Option B: use another Chinook variant
-If you want PostgreSQL, MySQL, SQL Server, or another supported engine from Chinook:
-1. Use the official Chinook SQL script for your engine from the upstream repository.
-2. Create the database with your usual database tool.
-3. Set `APP_DATABASE_URL` (or `DATABASE_URL`), `SQL_DIALECT`, and `ALLOWED_TABLES`.
-4. Run `python scripts/export_database_docs.py` against that database to generate the Markdown docs the agent will consume.
-5. Point `MARKDOWN_DOCS_DIR` at the generated output directory.
-
-## Assumptions and limitations
-- The SQL guard allows only a single read-only `SELECT` or `WITH ... SELECT` statement.
-- Allowed tables may be schema-qualified or schema-less, depending on the target database.
-- Database connectivity depends on a working SQLAlchemy URL and driver for your target database.
-- Markdown docs are injected as raw context, so concise, well-structured notes work best.
+## Guardrails and limitations
+- Only a single read-only `SELECT` or `WITH ... SELECT` statement is allowed.
+- Queries against non-allowlisted tables are blocked.
+- Connectivity depends on a valid SQLAlchemy URL and installed driver.
+- Markdown context is injected as raw text, so concise, specific docs perform best.

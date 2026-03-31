@@ -60,14 +60,6 @@ class Settings:
     openai_base_url: str | None
     hf_token: str | None
 
-    coda_api_token: str | None
-    coda_doc_id: str | None
-    coda_table_id_or_name: str | None
-    coda_schema_column: str
-    coda_table_column: str
-    coda_column_column: str
-    coda_description_column: str
-
 
 def load_settings() -> Settings:
     database_url = os.getenv("APP_DATABASE_URL", os.getenv("DATABASE_URL", os.getenv("REDSHIFT_URL", ""))).strip()
@@ -95,11 +87,4 @@ def load_settings() -> Settings:
         openai_api_key=os.getenv("OPENAI_API_KEY"),
         openai_base_url=os.getenv("OPENAI_BASE_URL"),
         hf_token=os.getenv("HF_TOKEN"),
-        coda_api_token=os.getenv("CODA_API_TOKEN"),
-        coda_doc_id=os.getenv("CODA_DOC_ID"),
-        coda_table_id_or_name=os.getenv("CODA_TABLE_ID_OR_NAME"),
-        coda_schema_column=os.getenv("CODA_SCHEMA_COLUMN", "schema_name"),
-        coda_table_column=os.getenv("CODA_TABLE_COLUMN", "table_name"),
-        coda_column_column=os.getenv("CODA_COLUMN_COLUMN", "column_name"),
-        coda_description_column=os.getenv("CODA_DESCRIPTION_COLUMN", "description"),
     )
