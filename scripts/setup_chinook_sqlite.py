@@ -73,9 +73,29 @@ def main() -> None:
         encoding="utf-8",
     )
 
+    gemma_env_path = output_root / ".env.gemma4"
+    gemma_env_path.write_text(
+        "\n".join(
+            [
+                f"APP_DATABASE_URL={database_url}",
+                "DATABASE_LABEL=Chinook SQLite database",
+                "SQL_DIALECT=sqlite",
+                f"MARKDOWN_DOCS_DIR={docs_dir}",
+                f"ALLOWED_TABLES={','.join(export_result.table_refs)}",
+                "",
+                "MODEL_PROVIDER=ollama",
+                "MODEL_ID=gemma4:e2b",
+                "OLLAMA_BASE_URL=http://localhost:11434/v1",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
     print(f"Copied SQLite database to {target_sqlite}")
     print(f"Generated Markdown docs in {docs_dir}")
     print(f"Wrote environment snippet to {env_path}")
+    print(f"Wrote Gemma 4 Ollama snippet to {gemma_env_path}")
 
 
 if __name__ == "__main__":

@@ -5,3 +5,8 @@ asyncpg>=0.30.0
 psycopg2-binary>=2.9.9
 python-dotenv>=1.0.1
 sqlglot>=26.0.0
+requests>=2.32.0
+litellm>=1.63.0
+
+# Optional notebook / evaluation extras live in pyproject.toml:
+# pip install -e ".[eval]"
