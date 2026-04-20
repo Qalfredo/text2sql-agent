@@ -258,7 +258,7 @@ class BenchmarkRunner:
         return self._evaluate_item(item)
 
     def run(self, max_items: int | None = None):
-        load_dotenv(".env", override=True)
+        load_dotenv(".env", override=False)
         items = load_dataset(self.dataset_path)
         if max_items is not None:
             items = items[:max_items]

@@ -60,6 +60,25 @@ class SQLDatabaseClient:
     def _join_table_ref(schema_name: str | None, table_name: str) -> str:
         return f"{schema_name}.{table_name}" if schema_name else table_name
 
+    def _resolve_unqualified_table(self, table_name: str) -> str | None:
+        direct_match = table_name if table_name in self.allowed_tables else None
+        if direct_match:
+            return direct_match
+
+        matches = [
+            table
+            for table in self.allowed_tables
+            if table == table_name or table.endswith(f".{table_name}")
+        ]
+        if len(matches) == 1:
+            return matches[0]
+        if len(matches) > 1:
+            raise SQLGuardError(
+                "Ambiguous unqualified table reference "
+                f"'{table_name}'. Use one of: {', '.join(sorted(matches))}."
+            )
+        return None
+
     def fetch_schema(self) -> dict[str, list[TableColumn]]:
         schema_map: dict[str, list[TableColumn]] = {}
         inspector = inspect(self.engine)
@@ -126,15 +145,8 @@ class SQLDatabaseClient:
             if schema_name:
                 found.add(self._join_table_ref(schema_name, table_name))
             else:
-                matches = [
-                    table
-                    for table in self.allowed_tables
-                    if table == table_name or table.endswith(f".{table_name}")
-                ]
-                if len(matches) == 1:
-                    found.add(matches[0])
-                else:
-                    found.add(table_name)
+                resolved = self._resolve_unqualified_table(table_name)
+                found.add(resolved or table_name)
 
         return found
 

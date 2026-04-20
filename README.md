@@ -74,6 +74,11 @@ cp examples/imdb/.env.generated .env
 ./scripts/run_chainlit.sh
 ```
 
+The default IMDb profile uses:
+- `APP_DATABASE_URL=postgresql+psycopg2://alfredo@localhost:5432/imdb`
+- `SQL_DIALECT=postgres`
+- generated markdown docs under `examples/imdb/docs/markdown`
+
 The default IMDb allowlist includes:
 - `imdb_core.title_genre`
 - `imdb_core.title_director`
@@ -85,6 +90,28 @@ The default IMDb allowlist includes:
 - `imdb_raw.title_ratings`
 - `imdb_raw.title_principals`
 - `imdb_raw.title_episode`
+
+## Using Any Database
+
+The runtime is database-agnostic. A database becomes usable by the agent when you provide a database profile with:
+
+- a reachable `APP_DATABASE_URL`
+- the matching `SQL_DIALECT`
+- a human-readable `DATABASE_LABEL`
+- an explicit `ALLOWED_TABLES` list
+- generated schema docs in `MARKDOWN_DOCS_DIR`
+
+The intended workflow is:
+
+1. point the app at a real SQLAlchemy-compatible connection URL
+2. choose a tight allowlist of queryable tables
+3. export markdown schema docs with `scripts/export_database_docs.py` or a database-specific setup script
+4. copy the generated `.env` snippet into `.env`
+5. run the app
+
+Chinook and IMDb are worked examples of the same pattern:
+- Chinook shows a small SQLite profile
+- IMDb shows a larger schema-qualified Postgres profile
 
 ## Configuration
 
@@ -180,6 +207,18 @@ python scripts/evaluate_agent.py \
   --dataset chinook_benchmark_v1.json.rtf \
   --output-dir eval_results
 ```
+
+IMDb smoke evaluation:
+
+```bash
+cp examples/imdb/.env.generated .env
+python scripts/evaluate_agent.py \
+  --dataset examples/imdb/imdb_smoke_eval.json \
+  --output-dir eval_results/imdb_smoke \
+  --max-items 5
+```
+
+This smoke dataset checks that the agent can operate against the IMDb profile for joins, ratings, genres, principals, episodes, and known-for relationships.
 
 Python:
 

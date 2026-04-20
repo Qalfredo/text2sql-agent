@@ -1,0 +1,72 @@
+[
+  {
+    "id": "imdb_smoke_001",
+    "category": "genre",
+    "difficulty": "easy",
+    "question": "Which 10 genres have the most titles?",
+    "gold_sql": "SELECT tg.genre, COUNT(*) AS titles FROM imdb_core.title_genre tg GROUP BY tg.genre ORDER BY titles DESC LIMIT 10"
+  },
+  {
+    "id": "imdb_smoke_002",
+    "category": "ratings",
+    "difficulty": "medium",
+    "question": "What are the 10 highest-rated titles that started in or after 2015 and have at least 100000 votes?",
+    "gold_sql": "SELECT tb.primary_title, tb.start_year, tr.average_rating, tr.num_votes FROM imdb_raw.title_basics tb JOIN imdb_raw.title_ratings tr ON tr.tconst = tb.tconst WHERE tb.start_year >= 2015 AND tr.num_votes >= 100000 ORDER BY tr.average_rating DESC, tr.num_votes DESC LIMIT 10"
+  },
+  {
+    "id": "imdb_smoke_003",
+    "category": "crew",
+    "difficulty": "medium",
+    "question": "Which 10 people have directed the most titles?",
+    "gold_sql": "SELECT nb.primary_name, COUNT(*) AS directed_titles FROM imdb_core.title_director td JOIN imdb_raw.name_basics nb ON nb.nconst = td.nconst GROUP BY nb.primary_name ORDER BY directed_titles DESC LIMIT 10"
+  },
+  {
+    "id": "imdb_smoke_004",
+    "category": "crew",
+    "difficulty": "medium",
+    "question": "Which 10 people have written the most titles?",
+    "gold_sql": "SELECT nb.primary_name, COUNT(*) AS written_titles FROM imdb_core.title_writer tw JOIN imdb_raw.name_basics nb ON nb.nconst = tw.nconst GROUP BY nb.primary_name ORDER BY written_titles DESC LIMIT 10"
+  },
+  {
+    "id": "imdb_smoke_005",
+    "category": "known_for",
+    "difficulty": "medium",
+    "question": "Which 10 people are known for the most titles?",
+    "gold_sql": "SELECT nb.primary_name, COUNT(*) AS known_for_count FROM imdb_core.name_known_for_title nk JOIN imdb_raw.name_basics nb ON nb.nconst = nk.nconst GROUP BY nb.primary_name ORDER BY known_for_count DESC LIMIT 10"
+  },
+  {
+    "id": "imdb_smoke_006",
+    "category": "episodes",
+    "difficulty": "medium",
+    "question": "Which 10 parent titles have the most episodes listed?",
+    "gold_sql": "SELECT parent.primary_title, COUNT(*) AS episode_count FROM imdb_raw.title_episode ep JOIN imdb_raw.title_basics parent ON parent.tconst = ep.parent_tconst GROUP BY parent.primary_title ORDER BY episode_count DESC LIMIT 10"
+  },
+  {
+    "id": "imdb_smoke_007",
+    "category": "title_type",
+    "difficulty": "easy",
+    "question": "How many movie titles started between 2000 and 2009 inclusive?",
+    "gold_sql": "SELECT COUNT(*) AS movie_count FROM imdb_raw.title_basics tb WHERE tb.title_type = 'movie' AND tb.start_year BETWEEN 2000 AND 2009"
+  },
+  {
+    "id": "imdb_smoke_008",
+    "category": "genre_ratings",
+    "difficulty": "medium",
+    "question": "What are the 10 highest-rated drama titles with at least 50000 votes?",
+    "gold_sql": "SELECT tb.primary_title, tr.average_rating, tr.num_votes FROM imdb_core.title_genre tg JOIN imdb_raw.title_basics tb ON tb.tconst = tg.tconst JOIN imdb_raw.title_ratings tr ON tr.tconst = tb.tconst WHERE tg.genre = 'Drama' AND tr.num_votes >= 50000 ORDER BY tr.average_rating DESC, tr.num_votes DESC LIMIT 10"
+  },
+  {
+    "id": "imdb_smoke_009",
+    "category": "principals",
+    "difficulty": "medium",
+    "question": "Which 10 people appear most often in title principals?",
+    "gold_sql": "SELECT nb.primary_name, COUNT(*) AS principal_rows FROM imdb_raw.title_principals tp JOIN imdb_raw.name_basics nb ON nb.nconst = tp.nconst GROUP BY nb.primary_name ORDER BY principal_rows DESC LIMIT 10"
+  },
+  {
+    "id": "imdb_smoke_010",
+    "category": "professions",
+    "difficulty": "easy",
+    "question": "Which 10 primary professions appear most often?",
+    "gold_sql": "SELECT npp.primary_profession, COUNT(*) AS people_count FROM imdb_core.name_primary_profession npp GROUP BY npp.primary_profession ORDER BY people_count DESC LIMIT 10"
+  }
+]

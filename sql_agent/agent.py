@@ -219,9 +219,9 @@ def build_agent_runtime(settings: Settings) -> AgentRuntime:
         "Never try to process query results in Python.\n"
         "3. Write a single SQL query that returns the final answer directly. "
         "Then call final_answer() with that string result.\n"
-        "4. When joining Artist and Album, always join Artist explicitly: "
-        "JOIN Artist ar ON al.ArtistId = ar.ArtistId — Album has no Name column for the artist.\n"
-        "5. Column names are case-sensitive in SQLite. Use exact names from the schema."
+        "4. Use exact table and column names from the schema context.\n"
+        "5. Prefer explicit schema-qualified table names when the database uses schemas.\n"
+        "6. If a query is blocked due to ambiguous unqualified table names, rewrite it with schema-qualified names."
     )
 
     agent = CodeAgent(

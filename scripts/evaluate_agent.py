@@ -14,7 +14,7 @@ from sql_agent.evaluation import BenchmarkRunner, ReportGenerator
 
 
 def evaluate(dataset_path: Path, output_dir: Path, max_items: int | None):
-    load_dotenv(".env", override=True)
+    load_dotenv(".env", override=False)
     settings = load_settings()
     runner = BenchmarkRunner(
         agent_config=settings,
@@ -58,13 +58,36 @@ def main() -> None:
         default=None,
         help="Optional cap for number of benchmark rows (useful for quick smoke tests).",
     )
+    parser.add_argument(
+        "--timeout-per-question",
+        type=int,
+        default=60,
+        help="Per-question timeout in seconds.",
+    )
     args = parser.parse_args()
 
-    evaluate(
-        dataset_path=Path(args.dataset).expanduser().resolve(),
+    load_dotenv(".env", override=False)
+    settings = load_settings()
+    runner = BenchmarkRunner(
+        agent_config=settings,
+        dataset=Path(args.dataset).expanduser().resolve(),
         output_dir=Path(args.output_dir).expanduser().resolve(),
-        max_items=args.max_items,
+        max_workers=1,
+        timeout_per_question=args.timeout_per_question,
     )
+    benchmark_result = runner.run(max_items=args.max_items)
+
+    report_generator = ReportGenerator(benchmark_result)
+    json_path = report_generator.write_json(runner.output_dir / f"agent_eval_{benchmark_result.run_id}.json")
+    csv_path = report_generator.write_csv(runner.output_dir / f"agent_eval_{benchmark_result.run_id}.csv")
+
+    total = benchmark_result.summary["total_items"]
+    passed = benchmark_result.summary["passed_items"]
+    print(f"Evaluated {total} items")
+    print(f"Passed: {passed}/{total} ({benchmark_result.summary['pass_rate']:.2%})")
+    print(f"JSON report: {json_path}")
+    print(f"CSV report: {csv_path}")
+    print(f"Run directory: {benchmark_result.run_dir}")
 
 
 if __name__ == "__main__":

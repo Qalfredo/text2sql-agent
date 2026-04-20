@@ -15,6 +15,7 @@ Important:
 - `docs/markdown/`: generated schema documentation for the allowlisted IMDb Postgres objects
 - `.env.generated`: ready-to-copy environment values for the IMDb example
 - `.env.gemma4`: ready-to-run Ollama example for the IMDb database
+- `imdb_smoke_eval.json`: lightweight smoke dataset for validating the agent against IMDb
 
 The default setup now targets `imdb_core` plus selected `imdb_raw` tables.
 
@@ -25,6 +26,20 @@ The default setup now targets `imdb_core` plus selected `imdb_raw` tables.
    `python scripts/setup_imdb_postgres.py`
 3. Copy the generated values from `examples/imdb/.env.generated` into your root `.env`.
 4. Start the app with `./scripts/run_chainlit.sh`.
+
+The generated profile uses the local Postgres connection that works in this environment:
+
+- `postgresql+psycopg2://alfredo@localhost:5432/imdb`
+
+## Smoke evaluation
+
+```bash
+cp examples/imdb/.env.generated .env
+python scripts/evaluate_agent.py \
+  --dataset examples/imdb/imdb_smoke_eval.json \
+  --output-dir eval_results/imdb_smoke \
+  --max-items 5
+```
 
 ## Companion repo
 

@@ -1,0 +1,1 @@
+imdb_core.title_genre,imdb_core.title_director,imdb_core.title_writer,imdb_core.name_known_for_title,imdb_core.name_primary_profession,imdb_raw.title_basics,imdb_raw.name_basics,imdb_raw.title_ratings,imdb_raw.title_principals,imdb_raw.title_episode

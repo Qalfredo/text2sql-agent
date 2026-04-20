@@ -22,6 +22,7 @@ DEFAULT_ALLOWED_TABLES = [
     "imdb_raw.title_principals",
     "imdb_raw.title_episode",
 ]
+DEFAULT_IMDB_DATABASE_URL = "postgresql+psycopg2://alfredo@localhost:5432/imdb"
 
 
 def _discover_imdb_repo(explicit_repo_dir: str | None) -> Path:
@@ -59,7 +60,7 @@ def main() -> None:
     docs_dir.mkdir(parents=True, exist_ok=True)
 
     imdb_repo_dir = _discover_imdb_repo(args.imdb_repo_dir)
-    database_url = args.database_url or "postgresql+psycopg2://postgres:postgres@localhost:5432/imdb"
+    database_url = args.database_url or DEFAULT_IMDB_DATABASE_URL
 
     export_result = export_schema_markdown(
         database_url=database_url,
@@ -101,6 +102,7 @@ def main() -> None:
 
     print(f"Using companion repo: {imdb_repo_dir}")
     print(f"Generated Markdown docs in {docs_dir}")
+    print(f"Allowlisted tables: {','.join(export_result.table_refs)}")
     print(f"Wrote environment snippet to {env_path}")
     print(f"Wrote Gemma 4 Ollama snippet to {gemma_env_path}")
 
